@@ -29,10 +29,12 @@ function card(cardTitle, cardDesc="") {
 }
 
 function resetCardOptions() {
+   //Always appears in the center tile, exactly 1 chosen per card
    centerSquares = [
       card("Default\nPony", "The majority of elements and Colors on a character are unchanged")
    ];
 
+   //Appear anywhere in the central 5x5, exactly 12 chosen per card
    commonSquares = [
       card("Twilight\nSparkle"),
       card("Fluttershy"),
@@ -52,6 +54,7 @@ function resetCardOptions() {
       card("Shining\nArmor")
    ];
 
+   //Appear anywhere in the central 5x5, exactly 12 chosen per card
    uncommonSquares = [
       card("E-Daters", "Or someponies who look like they are at least."),
       card("Void Thing", "The vast majority of a character's elements are pure black"),
@@ -78,6 +81,7 @@ function resetCardOptions() {
       card("Murder\nDrones", "Any Murder Drones Character."),
    ];
 
+   //Appear in the outer area of the card, exactly 6 chosen per card, each appears 4 times on the card
    rareSquares = [
       card("Pie Family", "Any member of the Pie family, excluding Pinkie Pie"),
       card("Apple\nFamily", "Any member of the Apple family, exculding Applejack and Apple Bloom"),
@@ -159,13 +163,43 @@ function V(x,y) {
     return new Vector(x,y);
 }
 
+class SpriteSheet {
+   image;
+   tileCount;
+   tileSize;
+
+   constructor(source, tileCount, sourceScale) {
+       this.image = new Image(sourceScale.x, sourceScale.y);
+       this.image.src = source;
+
+       this.tileCount = tileCount.clone();
+       this.tileSize = sourceScale.vDiv(tileCount);
+   }
+
+   getTilePosition(index) {
+       return V(index % this.tileCount.x, Math.floor(index / this.tileCount.x))
+   }
+
+   draw(pos, tilePos, size) {
+       size = size.ceil();
+       pos = pos.floor();
+       tilePos = tilePos.vMulti(this.tileSize);
+       c.drawImage(this.image, tilePos.x, tilePos.y, this.tileSize.x, this.tileSize.y, pos.x, pos.y, size.x, size.y);
+   }
+}
+
+
+
 //General variables
 var mousePos = V(0);
 var clicked = false;
+var timerPause = false;
 
 var globalDesc = "";
 var cards;
+var buttons = [];
 var startTime;
+var timeElapsed = 0;
 
 //Bingo square class
 class BingoSquare {
@@ -223,17 +257,52 @@ class BingoSquare {
 
       //Check if clicked
       if (this.touchingMouse()) {
-         if (clicked)
+         if (clicked && !timerPause)
             this.active = !this.active;
          globalDesc = this.data.desc;
       }
    }
 }
 
+class Button {
+
+   constructor(source, tile, pos, scale, onClick) {
+      this.source = source;
+      this.tile = tile;
+      this.pos = pos;
+      this.scale = scale;
+      this.onClick = onClick;
+   }
+
+   globalScale = 0;
+
+   touchingMouse() {
+      var offset = mousePos.div(this.globalScale).vSub(this.pos);
+      if (offset.x < this.scale.x && offset.y < this.scale.y && offset.x >= 0 && offset.y >= 0) {
+         return true;
+      }
+      return false;
+   }
+
+   draw(globalScale) {
+      this.globalScale = globalScale;
+
+      this.source.draw(this.pos.multi(globalScale), this.tile, this.scale.multi(globalScale));
+
+      if (this.touchingMouse()) {
+         if (clicked) {
+            this.onClick(this);
+         }
+      }
+   }
+
+}
+
 //Generate a new board
 function generateBoard() {
    cards = [];
    startTime = Date.now()
+   timeElapsed = 0;
 
    resetCardOptions();
    let commonLeft = 12;
@@ -288,8 +357,6 @@ function generateBoard() {
    }
 }
 
-generateBoard();
-
 
 //Check mouse stuff
 window.addEventListener('mousemove', (event) => {
@@ -297,7 +364,7 @@ window.addEventListener('mousemove', (event) => {
 });
 
 window.addEventListener('mousedown', (event)=>{
-   clicked = true;
+      clicked = true;
 });
 
 
@@ -328,6 +395,25 @@ function drawLine(pos, size) {
     c.fillRect(pos.x, pos.y, size.x, size.y)
  }
 
+//Setup
+
+generateBoard();
+
+var icons = new SpriteSheet("icons.png", V(3,3), V(750,750));
+
+buttons.push(new Button(icons, V(0,0), V(0.01,0.075), V(.075,.075), (b)=>{
+   if (b.tile.x == 0) {
+      b.tile.x = 1;
+   } else {
+      b.tile.x = 0;
+   }
+   timerPause = (b.tile.x == 1);
+
+}));
+buttons.push(new Button(icons, V(2,0), V(0.01,0.150), V(.075,.075), ()=>{
+   generateBoard();
+}));
+
 
 //Update frame
 function update() {
@@ -341,23 +427,30 @@ function update() {
    scale *= 0.8;
    globalDesc = "";
 
+   if (!timerPause)
+      timeElapsed += Date.now() - startTime;
+
    for (let i=0; i<cards.length; i++) {
       for (let j=0; j<cards[i].length; j++) {
          try { //I don't think I need a try here anymore
             cards[i][j].draw(V(i/7, j/7), V(scale, scale), V(canvas.width / 2 - scale / 2, offset/2));
          } catch (error) {
-            console.log("oops")
          }
       }
    }
 
+   for (let i=0; i<buttons.length; i++) {
+      buttons[i].draw(scale);
+   }
+
    //Draw text
-   c.font = Math.floor(scale/30) + 'pt Pixelify Sans';
+   c.font = Math.floor(scale/20) + 'pt Pixelify Sans';
    c.fillStyle = 'white'
-   c.fillText((Date.now() - startTime) / 1000, scale/80, scale/30)
+   
+   c.fillText(timeElapsed/1000, scale/70, scale/18)
 
    if (globalDesc != "") {
-      
+      c.font = Math.floor(scale/30) + 'pt Pixelify Sans';
       c.textAlign = 'center'
       c.fillText(globalDesc, canvas.width/2, scale/12, canvas.width);
       c.textAlign = 'left'
@@ -367,5 +460,7 @@ function update() {
    if (clicked) {
       clicked = false;
    }
+
+   startTime = Date.now();
 
 }
