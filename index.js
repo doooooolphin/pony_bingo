@@ -90,7 +90,7 @@ function resetCardOptions() {
       card("Cutie Mark\nCrusaders (all)", "Apple Bloom, Sweetie Belle, AND Scootaloo. They do not need to be together, but all must be seen."),
       card("The Great and\nPowerful Trixie"),
       card("Zecora"),
-      card("Queen\nChrysalis"),
+      card("Changeling", "Queen Chrysalis or any other changeling."),
       card("Garfield", "ANY character from Garfield."),
       card("Cheese\nSandwich")
    ];
@@ -200,6 +200,7 @@ var cards;
 var buttons = [];
 var startTime;
 var timeElapsed = 0;
+var started = false;
 
 //Bingo square class
 class BingoSquare {
@@ -360,11 +361,20 @@ function generateBoard() {
 
 //Check mouse stuff
 window.addEventListener('mousemove', (event) => {
-   mousePos = V((event.clientX-5),(event.clientY-5));
+   let rect = canvas.getBoundingClientRect();
+
+   mousePos = V((event.clientX-5 - rect.left),(event.clientY-5 - rect.top));
 });
 
 window.addEventListener('mousedown', (event)=>{
-      clicked = true;
+   if (!started && mousePos.x > 5 && mousePos.y > 5) {
+      started = true;
+      startTime = Date.now();
+
+      return;
+   }
+   
+   clicked = true;
 });
 
 
@@ -417,9 +427,25 @@ buttons.push(new Button(icons, V(2,0), V(0.01,0.150), V(.075,.075), ()=>{
 
 //Update frame
 function update() {
+   
    //Reset frame
    c.fillStyle = "black";
-   drawRect(V(0), V(canvas.width, canvas.height))
+   drawRect(V(0), V(canvas.width, canvas.height));
+
+   if (!started) {
+      c.font = Math.floor(canvas.width / 50) + "pt Pixelify Sans";
+      c.textAlign = 'center';
+      c.fillStyle = 'white';
+      c.fillText("Click here to do a bingos! haeh!", canvas.width/2, canvas.height/2);
+      c.font = Math.floor(canvas.width / 90) + "pt Pixelify Sans";
+      c.fillText("(The clicking area is very big)", canvas.width/2, canvas.height*.55);
+
+
+      c.textAlign = 'left';
+
+      return;
+      
+   }
 
    //Set some variables
    let scale = Math.min(canvas.width, canvas.height);

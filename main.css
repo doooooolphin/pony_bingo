@@ -1,0 +1,19 @@
+body{
+    background-color: rgb(0, 0, 0);
+    text-align: center;
+    color :#9a9a9a;
+    font-size: 28px;
+    font-family: "Pixelify Sans";
+
+
+}
+p{
+    color:#ff82cf;
+    font-size: 48px;
+    font-family: "Asset";
+}
+p1{
+    color:#675f64;
+    font-size: 20px;
+    font-family: 'Courier New', Courier, monospace;
+}
