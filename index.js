@@ -48,7 +48,6 @@ function resetCardOptions() {
       card("Discord"),
       card("Spike", "The Dragon"),
       card("Starlight\nGlimmer"),
-      card("Sunset\nShimmer"),
       card("Derpy"),
       card("Cutie Mark\nCrusader (any)", "Apple Bloom, Sweetie Belle, or Scootaloo."),
       card("Shining\nArmor")
@@ -56,16 +55,19 @@ function resetCardOptions() {
 
    //Appear anywhere in the central 5x5, exactly 12 chosen per card
    uncommonSquares = [
+      card("Bat Pony", "A character with bat pony traits, bat wings, etc. Flutterbat is included."),
+      card("Zebra Pony", "Any zebra character."),
+
       card("E-Daters", "Or someponies who look like they are at least."),
       card("Void Thing", "The vast majority of a character's elements are pure black"),
-      card("Trend", "A group of people all doing something. (Ex: Bread Line)"),
+      card("Trend /\nChain", "A group of people all doing something. (Ex: All holding some item)"),
       card("Item Stash", "A large collection of the same item placed down."),
       card("Camoflauge", "A character designed to blend into the ground, water, etc."),
-      card("Bat Pony", "A character with bat pony traits, bat wings, etc. Flutterbat is included."),
       card("Any Mane 6\n(Emo)", "Twilight Sparkle, Rainbow Dash, Pinkie Pie, Rarity, Applejack, or Fluttershy, but they're emo."),
-      card("Zebra Pony", "Any zebra character."),
       card("3+ MLP\nDoppelgangers", "Three or more of the same MLP charcter in a group together."),
       card("Statue", "Someone who is pretending to be a statue."),
+      card("\"DNI\" /\n\"AFK\"", "Someone who has either phrase IN their name."), //Berba
+      card("\"Stoney\nPony\"", "Someone who is high or something like that."), //Berba
 
       card("Angel Dust\n(Hazbin)"),
       card("Charlie\n(Hazbin)"),
@@ -92,6 +94,7 @@ function resetCardOptions() {
       card("Zecora"),
       card("Changeling", "Queen Chrysalis or any other changeling."),
       card("Garfield", "ANY character from Garfield."),
+      card("Sunset\nShimmer"),
       card("Cheese\nSandwich")
    ];
 }
